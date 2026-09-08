@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Login / Register — Restaurant POS</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #07080d;
+  --surface: rgba(14, 16, 25, 0.85);
+  --surface2: rgba(22, 24, 36, 0.75);
+  --border: rgba(201, 168, 76, 0.2);
+  --gold: #c9a84c;
+  --gold-gradient: linear-gradient(135deg, #c9a84c 0%, #d4b85a 30%, #e8d48b 60%, #a8873a 100%);
+  --text: #f0f2f8;
+  --text2: #9499b0;
+  --red: #ef4444;
+  --green: #22c55e;
+  --font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(201, 168, 76, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(34, 197, 94, 0.08) 0%, transparent 40%);
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(201, 168, 76, 0.08);
+}
+
+.brand-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.brand-icon {
+  font-size: 42px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 12px rgba(201, 168, 76, 0.3));
+}
+.brand-title {
+  font-size: 22px;
+  font-weight: 800;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.02em;
+}
+.brand-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-top: 4px;
+}
+
+.tab-buttons {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.tab-btn.active {
+  background: var(--surface2);
+  color: var(--gold);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.auth-form.hidden {
+  display: none;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group label {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text2);
+  letter-spacing: 0.02em;
+}
+.form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(22, 24, 36, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px !important;
+  outline: none;
+  transition: all 0.2s ease;
+}
+.form-group input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--gold-gradient);
+  color: #0a0a0f;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.3);
+}
+.btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(201, 168, 76, 0.4);
+}
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+.error-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--red);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+.success-banner {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--green);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+}
+</style>
+</head>
+<body>
+
+<div class="auth-container">
+  <div class="brand-header">
+    <div class="brand-icon">🍽️</div>
+    <div class="brand-title">Restaurant POS</div>
+    <div class="brand-sub">Multi-User Restaurant Management</div>
+  </div>
+
+  <div class="tab-buttons">
+    <button class="tab-btn active" id="tab-login" onclick="showTab('login')">Sign In</button>
+    <button class="tab-btn" id="tab-register" onclick="showTab('register')">Register Restaurant</button>
+  </div>
+
+  <div class="error-banner" id="error-msg"></div>
+  <div class="success-banner" id="success-msg"></div>
+
+  <!-- LOGIN FORM -->
+  <form class="auth-form" id="form-login" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label>Username / Email</label>
+      <input type="text" id="login-username" placeholder="Enter username or email" required>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="Enter password" required>
+    </div>
+    <button type="submit" class="btn-submit">Sign In →</button>
+  </form>
+
+  <!-- REGISTER FORM -->
+  <form class="auth-form hidden" id="form-register" onsubmit="handleRegister(event)">
+    <div class="form-group">
+      <label>Restaurant Name</label>
+      <input type="text" id="reg-restaurant" placeholder="e.g. Royal Biryani & Cafe" required>
+    </div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="reg-username" placeholder="Choose a username" required>
+    </div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="reg-email" placeholder="owner@restaurant.com" required>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="reg-password" placeholder="Create a strong password" required minlength="4">
+    </div>
+    <button type="submit" class="btn-submit">Create Account &amp; POS →</button>
+  </form>
+</div>
+
+<script>
+function showTab(tab) {
+  var errorMsg = document.getElementById('error-msg');
+  var successMsg = document.getElementById('success-msg');
+  errorMsg.style.display = 'none';
+  successMsg.style.display = 'none';
+
+  if (tab === 'login') {
+    document.getElementById('tab-login').classList.add('active');
+    document.getElementById('tab-register').classList.remove('active');
+    document.getElementById('form-login').classList.remove('hidden');
+    document.getElementById('form-register').classList.add('hidden');
+  } else {
+    document.getElementById('tab-register').classList.add('active');
+    document.getElementById('tab-login').classList.remove('active');
+    document.getElementById('form-register').classList.remove('hidden');
+    document.getElementById('form-login').classList.add('hidden');
+  }
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  var u = document.getElementById('login-username').value.trim();
+  var p = document.getElementById('login-password').value;
+  var err = document.getElementById('error-msg');
+  err.style.display = 'none';
+
+  fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: u, password: p })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (res.success) {
+      window.location.href = '/';
+    } else {
+      err.textContent = res.message || 'Invalid username or password';
+      err.style.display = 'block';
+    }
+  }).catch(function(){
+    err.textContent = 'Server error. Please try again.';
+    err.style.display = 'block';
+  });
+}
+
+function handleRegister(e) {
+  e.preventDefault();
+  var rName = document.getElementById('reg-restaurant').value.trim();
+  var u = document.getElementById('reg-username').value.trim();
+  var em = document.getElementById('reg-email').value.trim();
+  var p = document.getElementById('reg-password').value;
+  var err = document.getElementById('error-msg');
+  var succ = document.getElementById('success-msg');
+  err.style.display = 'none';
+  succ.style.display = 'none';
+
+  fetch('/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ restaurant_name: rName, username: u, email: em, password: p })
+  }).then(function(r){ return r.json(); }).then(function(res){
+    if (res.success) {
+      succ.textContent = 'Account created successfully! Logging you in…';
+      succ.style.display = 'block';
+      setTimeout(function(){ window.location.href = '/'; }, 1000);
+    } else {
+      err.textContent = res.message || 'Registration failed';
+      err.style.display = 'block';
+    }
+  }).catch(function(){
+    err.textContent = 'Server error. Please try again.';
+    err.style.display = 'block';
+  });
+}
+</script>
+</body>
+</html>

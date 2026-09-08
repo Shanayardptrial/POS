@@ -13,14 +13,14 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from functools import wraps
 from io import StringIO
-from flask import Flask, render_template, request, jsonify, send_file, Response, session
+from flask import Flask, render_template, request, jsonify, send_file, Response, session, redirect, url_for
 
 # Canonical config — single source of truth (config.py)
 from config import BASE_DIR, DATA_DIR, BACKUPS_DIR, LOG_DIR, DATABASE_URL, HOST as CFG_HOST, PORT as CFG_PORT, DEBUG as CFG_DEBUG
 
 from database import (
     db, init_db, migrate_json_data,
-    Category, MenuItem, Order, OrderItem,
+    User, Category, MenuItem, Order, OrderItem,
     Table as POSModelTable, PendingOrder, PendingOrderItem,
     Expense, Staff, SalaryPayment, AdminCred, Settings,
     InventoryItem, KOT, KOTItem,
@@ -89,6 +89,152 @@ def _set_security_headers(response):
 def _enforce_content_length():
     # Flask already enforces MAX_CONTENT_LENGTH; return 413 is automatic.
     pass
+
+def get_current_user_id():
+    """Return current logged in user ID from session or default 1."""
+    return session.get("user_id", 1)
+
+def seed_default_data_for_user(user_id):
+    """Seed initial tables and starter menu items for a new registered user."""
+    try:
+        default_tables = [
+            ("T1", "Table 1", "indoor", 4), ("T2", "Table 2", "indoor", 4),
+            ("T3", "Table 3", "indoor", 4), ("T4", "Table 4", "indoor", 4),
+            ("T5", "Table 5", "indoor", 4), ("T6", "Table 6", "indoor", 4),
+            ("T7", "Table 7", "indoor", 4), ("T8", "Table 8", "indoor", 6),
+            ("T9", "Table 9", "indoor", 6), ("T10", "Table 10", "indoor", 8),
+            ("P1", "Patio 1", "outdoor", 4), ("P2", "Patio 2", "outdoor", 4),
+            ("P3", "Patio 3", "outdoor", 6)
+        ]
+        for tid, tname, tzone, tcap in default_tables:
+            tb = POSModelTable(table_id=f"{tid}_u{user_id}", user_id=user_id, name=tname, zone=tzone, capacity=tcap, status="available")
+            db.session.add(tb)
+
+        cats = [
+            ("biryani", "Biryani & Rice", "🍲"),
+            ("starter", "Starters & Tandoori", "🍗"),
+            ("curry", "Main Course Curries", "🥘"),
+            ("bread", "Roti & Naan", "🫓"),
+            ("beverage", "Drinks & Lassi", "🥤"),
+            ("dessert", "Desserts & Sweets", "🍨")
+        ]
+        for cid, cname, cicon in cats:
+            if not db.session.execute(db.select(Category).where(Category.id == cid)).scalar_one_or_none():
+                db.session.add(Category(id=cid, name=cname, icon=cicon))
+
+        items = [
+            ("chicken_biryani", "Chicken Dum Biryani", 280.0, "biryani", "🍲"),
+            ("mutton_biryani", "Hyderabadi Mutton Biryani", 350.0, "biryani", "🍲"),
+            ("paneer_tikka", "Paneer Tikka", 220.0, "starter", "🧀"),
+            ("chicken_tikka", "Chicken Tikka (6 pcs)", 260.0, "starter", "🍗"),
+            ("butter_chicken", "Butter Chicken", 310.0, "curry", "🥘"),
+            ("dal_makhani", "Dal Makhani", 210.0, "curry", "🫕"),
+            ("butter_naan", "Butter Naan", 45.0, "bread", "🫓"),
+            ("mango_lassi", "Mango Lassi", 90.0, "beverage", "🥤"),
+            ("gulab_jamun", "Gulab Jamun (2 pcs)", 80.0, "dessert", "🍨")
+        ]
+        for item_id, item_name, price, cat_id, icon in items:
+            mi = MenuItem(id=f"{item_id}_u{user_id}", user_id=user_id, name=item_name, price=price, category_id=cat_id, icon=icon, available=True)
+            db.session.add(mi)
+
+        db.session.commit()
+    except Exception as exc:
+        db.session.rollback()
+        logger.warning("Error seeding default data for user %s: %s", user_id, exc)
+
+# ---------------------------------------------------------------------------
+# Auth Routes & Endpoints
+# ---------------------------------------------------------------------------
+
+@app.route("/login", methods=["GET", "POST"])
+def login_route():
+    if request.method == "GET":
+        if "user_id" in session:
+            return redirect("/")
+        return render_template("login.html")
+    
+    data = request.get_json(silent=True) or request.form
+    username_or_email = (data.get("username") or "").strip()
+    password = data.get("password") or ""
+
+    if not username_or_email or not password:
+        return jsonify({"success": False, "message": "Username/email and password required"}), 400
+
+    user = db.session.execute(
+        db.select(User).where(
+            (User.username == username_or_email) | (User.email == username_or_email.lower())
+        )
+    ).scalar_one_or_none()
+
+    if not user or not user.check_password(password):
+        return jsonify({"success": False, "message": "Invalid username or password"}), 401
+
+    session["user_id"] = user.id
+    session["username"] = user.username
+    session["restaurant_name"] = user.restaurant_name
+    session["admin_token"] = secrets.token_hex(16)
+    session["admin_role"] = "admin"
+    session.permanent = True
+
+    return jsonify({"success": True, "message": "Login successful", "user": user.to_dict()})
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register_route():
+    if request.method == "GET":
+        if "user_id" in session:
+            return redirect("/")
+        return render_template("login.html")
+
+    data = request.get_json(silent=True) or request.form
+    restaurant_name = (data.get("restaurant_name") or "My Restaurant").strip()
+    username = (data.get("username") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+
+    if not username or not email or not password:
+        return jsonify({"success": False, "message": "All fields are required"}), 400
+
+    existing_user = db.session.execute(
+        db.select(User).where((User.username == username) | (User.email == email))
+    ).scalar_one_or_none()
+
+    if existing_user:
+        return jsonify({"success": False, "message": "Username or Email already registered"}), 400
+
+    new_user = User(username=username, email=email, restaurant_name=restaurant_name)
+    new_user.set_password(password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    # Seed initial user tables and menu
+    seed_default_data_for_user(new_user.id)
+
+    session["user_id"] = new_user.id
+    session["username"] = new_user.username
+    session["restaurant_name"] = new_user.restaurant_name
+    session["admin_token"] = secrets.token_hex(16)
+    session["admin_role"] = "admin"
+    session.permanent = True
+
+    return jsonify({"success": True, "message": "Registration successful", "user": new_user.to_dict()})
+
+
+@app.route("/logout")
+def logout_route():
+    session.clear()
+    return redirect("/login")
+
+
+@app.route("/api/me")
+def api_me():
+    if "user_id" not in session:
+        return jsonify({"authenticated": False}), 401
+    user = db.session.execute(db.select(User).where(User.id == session["user_id"])).scalar_one_or_none()
+    if not user:
+        session.clear()
+        return jsonify({"authenticated": False}), 401
+    return jsonify({"authenticated": True, "user": user.to_dict()})
 
 # ---------------------------------------------------------------------------
 # Shared helpers

@@ -135,6 +135,36 @@ def verify_password(plain_password, hashed):
         return False
 
 
+class User(Base):
+    __tablename__ = "users"
+    __table_args__ = (
+        db.Index("idx_users_username", "username"),
+        db.Index("idx_users_email", "email"),
+    )
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(String(80), unique=True, nullable=False)
+    email = db.Column(String(120), unique=True, nullable=False)
+    password_hash = db.Column(String(255), nullable=False)
+    restaurant_name = db.Column(String(200), default="Restaurant POS")
+    created_at = db.Column(DateTime, default=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    def check_password(self, password):
+        return verify_password(password, self.password_hash)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "restaurant_name": self.restaurant_name or "Restaurant POS",
+            "created_at": self.created_at.strftime("%d-%m-%Y %H:%M") if self.created_at else "",
+        }
+
+
 class MenuItem(Base):
     __tablename__ = "menu_items"
     __table_args__ = (
@@ -143,6 +173,7 @@ class MenuItem(Base):
     )
 
     id = db.Column(String(50), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     name = db.Column(String(200), nullable=False)
     price = db.Column(Float, nullable=False)
     category_id = db.Column(String(50), ForeignKey("categories.id"), nullable=False)
@@ -171,6 +202,7 @@ class Order(Base):
     )
 
     bill_id = db.Column(String(20), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     date = db.Column(DateTime, nullable=False)
     table = db.Column(String(20), default="")
     customer = db.Column(String(100), default="")
@@ -231,6 +263,7 @@ class Table(Base):
     )
 
     table_id = db.Column(String(20), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     name = db.Column(String(100), default="")
     status = db.Column(String(20), default="available")
     capacity = db.Column(Integer, default=4)
@@ -255,6 +288,7 @@ class PendingOrder(Base):
     )
 
     table_id = db.Column(String(20), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     customer = db.Column(String(100), default="")
     subtotal = db.Column(Float, default=0.0)
     gst = db.Column(Float, default=0.0)
@@ -310,6 +344,7 @@ class Expense(Base):
     )
 
     id = db.Column(String(20), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     date = db.Column(DateTime, nullable=False)
     category = db.Column(String(100), default="")
     description = db.Column(String(500), default="")
@@ -334,6 +369,7 @@ class Staff(Base):
     )
 
     id = db.Column(String(20), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     name = db.Column(String(100), nullable=False)
     role = db.Column(String(50), default="staff")
     salary = db.Column(Float, nullable=False)
@@ -360,6 +396,7 @@ class SalaryPayment(Base):
     )
 
     id = db.Column(String(20), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     date = db.Column(DateTime, nullable=False)
     month = db.Column(String(7), nullable=False)
     staff_ids = db.Column(Text, default="[]")
@@ -403,6 +440,7 @@ class Settings(Base):
     __tablename__ = "settings"
 
     key = db.Column(String(50), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     value = db.Column(Text, default="")
 
 
@@ -414,6 +452,7 @@ class InventoryItem(Base):
     )
 
     id = db.Column(String(50), primary_key=True)
+    user_id = db.Column(db.Integer, ForeignKey("users.id"), nullable=True, default=1)
     name = db.Column(String(200), nullable=False)
     category = db.Column(String(100), default="")
     quantity = db.Column(Integer, default=0)
@@ -601,10 +640,12 @@ def _migrate_schema_missing_columns():
             "icon": "VARCHAR(20) DEFAULT ''",
         },
         "menu_items": {
+            "user_id": "INTEGER DEFAULT 1",
             "available": "BOOLEAN DEFAULT 1",
             "icon": "VARCHAR(20) DEFAULT ''",
         },
         "inventory_items": {
+            "user_id": "INTEGER DEFAULT 1",
             "category": "VARCHAR(100) DEFAULT ''",
             "quantity": "INTEGER DEFAULT 0",
             "unit": "VARCHAR(20) DEFAULT 'pcs'",
@@ -613,6 +654,7 @@ def _migrate_schema_missing_columns():
             "created_at": "DATETIME",
         },
         "kitchen_order_tickets": {
+            "user_id": "INTEGER DEFAULT 1",
             "order_id": "VARCHAR(20)",
             "table": "VARCHAR(20)",
             "customer": "VARCHAR(100) DEFAULT ''",
@@ -629,9 +671,11 @@ def _migrate_schema_missing_columns():
             "special_notes": "VARCHAR(500) DEFAULT ''",
         },
         "staff": {
+            "user_id": "INTEGER DEFAULT 1",
             "paid_months": "TEXT DEFAULT '[]'",
         },
         "salary_payments": {
+            "user_id": "INTEGER DEFAULT 1",
             "payment_type": "VARCHAR(20) DEFAULT 'full'",
             "notes": "TEXT DEFAULT ''",
             "status": "VARCHAR(20) DEFAULT 'completed'",
@@ -642,6 +686,7 @@ def _migrate_schema_missing_columns():
             "created_at": "DATETIME",
         },
         "orders": {
+            "user_id": "INTEGER DEFAULT 1",
             "table": "VARCHAR(20) DEFAULT ''",
             "customer": "VARCHAR(100) DEFAULT ''",
             "payment_mode": "VARCHAR(20) DEFAULT 'cash'",
@@ -654,6 +699,7 @@ def _migrate_schema_missing_columns():
             "item_total": "FLOAT DEFAULT 0.0",
         },
         "tables": {
+            "user_id": "INTEGER DEFAULT 1",
             "name": "VARCHAR(100) DEFAULT ''",
             "status": "VARCHAR(20) DEFAULT 'available'",
             "capacity": "INTEGER DEFAULT 4",
@@ -661,6 +707,7 @@ def _migrate_schema_missing_columns():
             "updated_at": "DATETIME",
         },
         "pending_orders": {
+            "user_id": "INTEGER DEFAULT 1",
             "customer": "VARCHAR(100) DEFAULT ''",
             "subtotal": "FLOAT DEFAULT 0.0",
             "gst": "FLOAT DEFAULT 0.0",
@@ -668,9 +715,13 @@ def _migrate_schema_missing_columns():
             "updated_at": "DATETIME",
         },
         "expenses": {
+            "user_id": "INTEGER DEFAULT 1",
             "category": "VARCHAR(100) DEFAULT ''",
             "description": "VARCHAR(500) DEFAULT ''",
             "paid_by": "VARCHAR(50) DEFAULT 'admin'",
+        },
+        "settings": {
+            "user_id": "INTEGER DEFAULT 1",
         },
     }
     try:

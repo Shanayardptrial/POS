@@ -1327,6 +1327,14 @@ var lastCreatedOrderItems=[];
    ═══════════════════════════════════════════════════ */
 (function init(){
   loadSettings();
+  fetch('/api/me').then(function(r){ return r.json(); }).then(function(res){
+    if (res.authenticated && res.user) {
+      if (res.user.restaurant_name) {
+        document.getElementById('br-name').textContent = res.user.restaurant_name;
+        document.getElementById('br-sub').textContent = '@' + res.user.username;
+      }
+    }
+  }).catch(function(){});
   fetch('/api/menu').then(function(r){return r.json();}).then(function(data){
     menu=data;
     renderPanelTabs();
