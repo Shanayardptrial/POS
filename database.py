@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import lru_cache
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Text, func, DateTime, String, Float, Boolean, Integer, ForeignKey
+from sqlalchemy import Text, func, DateTime, String, Float, Boolean, Integer, ForeignKey, inspect, text
 from sqlalchemy.orm import DeclarativeBase, relationship
 import bcrypt
 
@@ -673,39 +673,36 @@ def _migrate_schema_missing_columns():
             "paid_by": "VARCHAR(50) DEFAULT 'admin'",
         },
     }
-    for table, col_defs in table_column_defs.items():
-        try:
-            # Check table exists first
-            tbl_exists = db.session.execute(text(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")).fetchone()
-            if not tbl_exists:
-                continue
-            cols_exist = [
-                row[1] for row in db.session.execute(
-                    text(f"PRAGMA table_info({table})")
-                ).fetchall()
-            ]
-            for col, definition in col_defs.items():
-                if col not in cols_exist:
-                    try:
-                        db.session.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {definition}"))
-                        db.session.commit()
-                        logger.info("Added missing column '%s' to table '%s' (%s)", col, table, definition)
-                    except Exception as col_exc:
-                        try:
-                            db.session.rollback()
-                        except Exception:
-                            pass
-                        # idempotent: ignore duplicate column errors
-                        if "duplicate" in str(col_exc).lower() or "already exists" in str(col_exc).lower():
-                            logger.info("Column '%s' already exists in '%s' (race)", col, table)
-                        else:
-                            logger.warning("Failed to add column '%s' to '%s': %s", col, table, col_exc)
-        except Exception as e:
+    try:
+        inspector = inspect(db.engine)
+        for table, col_defs in table_column_defs.items():
             try:
-                db.session.rollback()
-            except Exception:
-                pass
-            logger.warning("Schema migration for %s skipped: %s", table, e)
+                if not inspector.has_table(table):
+                    continue
+                cols_exist = [c["name"] for c in inspector.get_columns(table)]
+                for col, definition in col_defs.items():
+                    if col not in cols_exist:
+                        try:
+                            db.session.execute(text(f"ALTER TABLE {table} ADD COLUMN {col} {definition}"))
+                            db.session.commit()
+                            logger.info("Added missing column '%s' to table '%s' (%s)", col, table, definition)
+                        except Exception as col_exc:
+                            try:
+                                db.session.rollback()
+                            except Exception:
+                                pass
+                            if "duplicate" in str(col_exc).lower() or "already exists" in str(col_exc).lower():
+                                logger.info("Column '%s' already exists in '%s' (race)", col, table)
+                            else:
+                                logger.warning("Failed to add column '%s' to '%s': %s", col, table, col_exc)
+            except Exception as e:
+                try:
+                    db.session.rollback()
+                except Exception:
+                    pass
+                logger.warning("Schema migration for %s skipped: %s", table, e)
+    except Exception as exc:
+        logger.warning("Database inspection skipped: %s", exc)
 
     # Fix legacy data: staff.paid_months empty string -> '[]'
     try:
