@@ -2,7 +2,7 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Admin — POS Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -432,34 +432,50 @@
             .dash-body{height:calc(100dvh - 60px)}
         }
         @media(max-width:768px){
-            .stats{grid-template-columns:repeat(2,1fr)}
-            .chart-grid{grid-template-columns:1fr}
+            input[type="text"], input[type="number"], input[type="search"], input[type="password"], select, textarea {
+                font-size: 16px !important;
+            }
+            button, .btn, .nav-item, .card {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            button:active, .btn:active, .nav-item:active {
+                transform: scale(0.97);
+            }
+            .table-responsive, table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .stats{grid-template-columns:repeat(2,1fr) !important;gap:10px !important}
+            .chart-grid{grid-template-columns:1fr !important}
             .chart-box.full{grid-column:auto}
-            .card{padding:14px}
-            .filter-row{flex-direction:column;align-items:stretch}
-            .filter-row .fi{width:100%;min-width:0}
-            .form-row .fi{flex:1 1 100%;min-width:0}
+            .card{padding:14px !important}
+            .filter-row, .form-row {flex-direction:column !important;align-items:stretch !important}
+            .filter-row .fi, .form-row .fi {width:100% !important;min-width:0 !important}
             .search-bar{width:100% !important;max-width:100%}
-            .dash-top{padding:8px 12px;flex-wrap:wrap}
-            .dash-top-right{gap:6px}
+            .dash-top{padding:8px 12px;flex-wrap:wrap;gap:8px}
+            .dash-top-right{gap:6px;overflow-x:auto;width:100%;justify-content:flex-start}
             .theme-switch label{display:none}
+            .modal-dialog, .modal-content, .card-modal { width: 95vw !important; max-width: 95vw !important; margin: 10px auto !important; }
         }
         @media(max-width:600px){
             .dash-top .user-badge .user-role{display:none}
-            .dash-top-right .btn-nav{padding:6px 10px;font-size:11px}
-            .tables-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+            .dash-top-right .btn-nav{padding:6px 10px;font-size:11px;white-space:nowrap}
+            .tables-grid{grid-template-columns:repeat(2,1fr) !important;gap:8px !important}
             .theme-switch{padding:2px 4px}
             .theme-btn{padding:3px 6px;font-size:9px}
         }
         @media(max-width:480px){
-            .stats{grid-template-columns:1fr}
-            .login-box{width:92vw;padding:28px 20px}
-            .dash-top h1{font-size:14px}
+            .stats{grid-template-columns:1fr !important}
+            .login-box{width:95vw !important;padding:24px 16px !important}
+            .dash-top h1{font-size:14px !important}
             .user-badge span:not(.user-role){display:none}
             .user-badge{padding:0}
             .user-badge > *{padding:6px 10px}
             .user-badge .user-role{display:none}
-            .card{padding:12px}
+            .card{padding:10px !important}
         }
         @media(prefers-reduced-motion:reduce){
             *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
