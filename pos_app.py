@@ -91,8 +91,8 @@ def _enforce_content_length():
     pass
 
 def get_current_user_id():
-    """Return current logged in user ID from session or default 1."""
-    return session.get("user_id", 1)
+    """Return current logged in user ID from session or None."""
+    return session.get("user_id")
 
 def seed_default_data_for_user(user_id):
     """Seed initial tables and starter menu items for a new registered user."""
@@ -621,6 +621,8 @@ def _create_final_order(table, customer, payment_mode, items, discount_value, di
 
 @app.route("/")
 def index():
+    if "user_id" not in session:
+        return redirect("/login")
     return render_template("pos_index.html")
 
 
@@ -1450,6 +1452,8 @@ def delete_inventory_item(item_id):
 
 @app.route("/admin")
 def admin_page():
+    if "user_id" not in session:
+        return redirect("/login")
     return render_template("admin.html")
 
 
