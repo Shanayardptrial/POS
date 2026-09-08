@@ -1,0 +1,17 @@
+# Restaurant POS — pinned dependencies (Python 3.10+)
+# Core web stack
+Flask==3.1.0
+Flask-SQLAlchemy==3.1.1
+Flask-Cors==5.0.0
+SQLAlchemy==2.0.36
+bcrypt==4.2.1
+python-dotenv==1.0.1
+
+# Production WSGI servers (pick one)
+waitress==3.0.2          # Windows-friendly, pure-Python (recommended on Win)
+gunicorn==23.0.0         # Unix production (Linux/macOS); ignored on Windows
+
+# Optional but recommended
+Werkzeug==3.1.3
+Jinja2==3.1.5
+itsdangerous==2.2.0

@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.conda/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.conda/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Data files (keep data/ but ignore sensitive/generated files)
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/admin/credentials.json
+data/admin/*.json
+data/admin/secret.key
+data/orders/*.json
+data/pending/*.json
+data/backups/*.zip
+data/pos.db
+!data/.gitkeep
+!data/admin/.gitkeep
+!data/orders/.gitkeep
+!data/pending/.gitkeep
+!data/backups/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs — ignore logs dir contents but keep .gitkeep
+*.log
+logs/
+!logs/.gitkeep
+
+# Kilo
+.kilo/

@@ -1,0 +1,139 @@
+{
+  "categories": [
+    {
+      "id": "biryani",
+      "name": "Biryani",
+      "icon": "🍚"
+    },
+    {
+      "id": "curry",
+      "name": "Curry",
+      "icon": "🍛"
+    },
+    {
+      "id": "roti",
+      "name": "Roti",
+      "icon": "🫓"
+    },
+    {
+      "id": "drinks",
+      "name": "Drinks",
+      "icon": "🥤"
+    },
+    {
+      "id": "dessert",
+      "name": "Dessert",
+      "icon": "🍰"
+    },
+    {
+      "id": "starter",
+      "name": "Starter",
+      "icon": "🍢"
+    }
+  ],
+  "items": [
+    {
+      "id": "chicken_biryani",
+      "name": "Chicken Biryani",
+      "price": 180,
+      "category": "biryani"
+    },
+    {
+      "id": "mutton_biryani",
+      "name": "Mutton Biryani",
+      "price": 220,
+      "category": "biryani"
+    },
+    {
+      "id": "veg_biryani",
+      "name": "Veg Biryani",
+      "price": 120,
+      "category": "biryani"
+    },
+    {
+      "id": "butter_chicken",
+      "name": "Butter Chicken",
+      "price": 200,
+      "category": "curry"
+    },
+    {
+      "id": "paneer_curry",
+      "name": "Paneer Curry",
+      "price": 150,
+      "category": "curry"
+    },
+    {
+      "id": "dal_curry",
+      "name": "Dal Curry",
+      "price": 80,
+      "category": "curry"
+    },
+    {
+      "id": "tandoori_roti",
+      "name": "Tandoori Roti",
+      "price": 20,
+      "category": "roti"
+    },
+    {
+      "id": "butter_naan",
+      "name": "Butter Naan",
+      "price": 35,
+      "category": "roti"
+    },
+    {
+      "id": "garlic_naan",
+      "name": "Garlic Naan",
+      "price": 40,
+      "category": "roti"
+    },
+    {
+      "id": "lassi",
+      "name": "Sweet Lassi",
+      "price": 60,
+      "category": "drinks"
+    },
+    {
+      "id": "masala_chai",
+      "name": "Masala Chai",
+      "price": 30,
+      "category": "drinks"
+    },
+    {
+      "id": "cold_coffee",
+      "name": "Cold Coffee",
+      "price": 80,
+      "category": "drinks"
+    },
+    {
+      "id": "gulab_jamun",
+      "name": "Gulab Jamun",
+      "price": 50,
+      "category": "dessert"
+    },
+    {
+      "id": "ice_cream",
+      "name": "Ice Cream",
+      "price": 60,
+      "category": "dessert"
+    },
+    {
+      "id": "chicken_tikka",
+      "name": "Chicken Tikka",
+      "price": 160,
+      "category": "starter"
+    },
+    {
+      "id": "paneer_tikka",
+      "name": "Paneer Tikka",
+      "price": 140,
+      "category": "starter"
+    },
+    {
+      "id": "d85bf447",
+      "name": "Paneer Tikka Deluxe",
+      "price": 195,
+      "category": "starter",
+      "available": true
+    }
+  ]
+}

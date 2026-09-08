@@ -1,0 +1,100 @@
+============================================
+  RESTAURANT POS SYSTEM — START HERE
+============================================
+
+Welcome! This guide will get you up and running in 5 minutes.
+
+
+STEP 1 — Check Python is Installed
+-----------------------------------
+1. Press Windows Key, type "cmd", press Enter
+2. In the black window, type:  python --version
+3. You should see something like: Python 3.11.x or Python 3.12.x
+4. If you see an error, install Python from https://www.python.org/downloads/
+
+   During installation, CHECK the box that says "Add Python to PATH"
+
+
+STEP 2 — Open the Project Folder
+---------------------------------
+1. Open File Explorer
+2. Go to: C:\Users\Admin\Desktop\POS
+3. You should see these files:
+      pos_app.py
+      database.py
+      requirements.txt
+      START_HERE.txt  <-- you are reading this
+      start.bat       <-- double-click this in Step 4!
+
+
+STEP 3 — Install Required Programs
+-----------------------------------
+1. Press Windows Key, type "cmd", press Enter
+2. Type this command and press Enter:
+      pip install -r "C:\Users\Admin\Desktop\POS\requirements.txt"
+3. Wait for it to finish (you'll see "Successfully installed...")
+
+
+STEP 4 — Start the POS System
+------------------------------
+Option A (Easiest):
+   Double-click  start.bat
+   A black window will open — this is normal. Leave it open.
+
+Option B (Command line):
+   In the cmd window, type:
+      cd C:\Users\Admin\Desktop\POS
+      python pos_app.py
+
+
+STEP 5 — Open in Your Browser
+------------------------------
+1. Open Chrome, Edge, or any browser
+2. Go to:  http://127.0.0.1:5500
+3. You should see the Restaurant POS interface with a floor plan
+
+   For the Admin Dashboard:
+   Go to:  http://127.0.0.1:5500/admin
+   Login:  admin  /  admin123
+
+
+STOPPING THE SYSTEM
+--------------------
+- Close the black cmd window, OR
+- In the cmd window press Ctrl+C
+
+
+WHAT YOU CAN DO
+---------------
+POS Interface (http://127.0.0.1:5500):
+  - Click a table to start an order
+  - Add food items from the menu
+  - Apply discounts and choose payment method
+  - Print bills
+
+Admin Panel (http://127.0.0.1:5500/admin):
+  - View sales reports and charts
+  - Manage menu items and categories
+  - Track expenses
+  - Manage staff and salaries
+  - Create backups of all data
+
+
+TROUBLESHOOTING
+---------------
+Q: "python" is not recognized
+A: Install Python from python.org and make sure "Add to PATH" is checked
+
+Q: "ModuleNotFoundError: No module named 'flask'"
+A: Run: pip install flask
+
+Q: "Address already in use"
+A: Close any other POS windows and try again, or edit pos_app.py to use port 5501
+
+Q: Can't log into admin
+A: Username: admin  |  Password: admin123
+
+
+============================================
+  That's it! Enjoy your POS system.
+============================================
