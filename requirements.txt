@@ -6,6 +6,7 @@ Flask-Cors==5.0.0
 SQLAlchemy==2.0.36
 bcrypt==4.2.1
 python-dotenv==1.0.1
+psycopg2-binary==2.9.10
 
 # Production WSGI servers (pick one)
 waitress==3.0.2          # Windows-friendly, pure-Python (recommended on Win)

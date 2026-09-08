@@ -49,18 +49,22 @@ EXPENSES_FILE: Path = ADMIN_DIR / "expenses.json"
 STAFF_FILE: Path = ADMIN_DIR / "staff.json"
 SALARY_PAYMENTS_FILE: Path = ADMIN_DIR / "salary_payments.json"
 
-DB_FILE: Path = DATA_DIR / "pos.db"
-DATABASE_URL: str = f"sqlite:///{DB_FILE.resolve()}"
-
-# ---------------------------------------------------------------------------
-# Environment-driven settings (with sane defaults)
-# ---------------------------------------------------------------------------
 # Prefer python-dotenv if installed; silently ignore if not.
 try:
     from dotenv import load_dotenv  # type: ignore
     load_dotenv(BASE_DIR / ".env")
 except Exception:
     pass
+
+DB_FILE: Path = DATA_DIR / "pos.db"
+_env_db_url = os.environ.get("DATABASE_URL") or os.environ.get("SUPABASE_DB_URL")
+if _env_db_url:
+    if _env_db_url.startswith("postgres://"):
+        _env_db_url = _env_db_url.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL: str = _env_db_url
+else:
+    DATABASE_URL: str = f"sqlite:///{DB_FILE.resolve()}"
+
 
 SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
 HOST: str = os.environ.get("HOST", "127.0.0.1")
